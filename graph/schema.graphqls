@@ -1,0 +1,41 @@
+type Link {
+  id: ID!
+  title: String!
+  address: String!
+  user: User!
+}
+
+type User {
+  id: ID!
+  name: String!
+}
+
+type Query {
+  allLinks: [Link!]!
+}
+
+input NewLink {
+  title: String!
+  address: String!
+}
+
+input NewUser {
+  username: String!
+  password: String!
+}
+
+input Login {
+  username: String!
+  password: String!
+}
+
+input RefreshTokenInput{
+  token: String!
+}
+
+type Mutation {
+  createLink(link: NewLink!): Link!
+  createUser(user: NewUser!): String!
+  login(input: Login!): String!
+  refreshtoken(token: RefreshTokenInput!): String!
+}
