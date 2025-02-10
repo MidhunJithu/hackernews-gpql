@@ -3,6 +3,7 @@ type Link {
   title: String!
   address: String!
   user: User!
+  score: Int!
 }
 
 type User {
@@ -38,4 +39,14 @@ type Mutation {
   createUser(user: NewUser!): String!
   login(input: Login!): String!
   refreshtoken(token: RefreshTokenInput!): String!
+  voteLink(input: VoteInput!):Int!
+}
+
+input VoteInput {
+  linkId: String!
+  vote: Int!
+}
+
+type Subscription{
+  linkAdded: Link!
 }

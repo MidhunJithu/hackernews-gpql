@@ -10,4 +10,5 @@ type HackerDB interface {
 	CreateUser(model.NewUser) (*model.User, error)
 	UserByName(string) (int, error)
 	AuthenticateUser(string, string) bool
+	VoteLink(model.VoteInput, int) (int, error)
 }

@@ -1,6 +1,7 @@
 package db
 
 import (
+	"database/sql"
 	"example/graphql/graph/model"
 	"example/graphql/ports"
 	"example/graphql/utils"
@@ -71,10 +72,17 @@ func (d *DbService) AllLinks(userid int) ([]*model.Link, error) {
 		Addr     string `db:"address"`
 		Userid   string `db:"userid"`
 		UserName string `db:"username"`
+		Score    int32  `db:"score"`
 	}
 	err := d.dB.Select(&info, `
-		SELECT links.id, title, address ,users.id as userid, users.Username as username 
-		FROM links inner join users 	on links.userid = users.id
+		SELECT 
+			links.id, 
+			title,
+			address,
+			coalesce(score,0) as score,
+			users.id as userid, 
+			users.Username as username 
+		FROM links inner join users	on links.userid = users.id
 		where users.id = $1`, userid)
 
 	if err != nil {
@@ -83,7 +91,7 @@ func (d *DbService) AllLinks(userid int) ([]*model.Link, error) {
 	}
 	links := make([]*model.Link, 0, len(info))
 	for _, v := range info {
-		links = append(links, &model.Link{ID: v.Id, Title: v.Title, Address: v.Addr, User: &model.User{
+		links = append(links, &model.Link{ID: v.Id, Title: v.Title, Address: v.Addr, Score: v.Score, User: &model.User{
 			ID:   v.Userid,
 			Name: v.UserName,
 		}})
@@ -113,4 +121,34 @@ func (d *DbService) AuthenticateUser(username string, password string) bool {
 		return false
 	}
 	return utils.PasswordMatch(password, hashedPassword)
+}
+func (d *DbService) VoteLink(vote model.VoteInput, userid int) (int, error) {
+	var score int
+	query := `WITH upsert AS (
+				INSERT INTO votes (linkid, userid, votetype)
+					VALUES ($1, $2, $3)
+				ON CONFLICT (linkid, userid)
+				DO UPDATE SET votetype = EXCLUDED.votetype
+				WHERE votes.votetype != EXCLUDED.votetype
+				AND votes.userid = EXCLUDED.userid
+				AND votes.linkid = EXCLUDED.linkid
+				RETURNING linkid, userid, votetype
+			)	
+			UPDATE links
+				SET score = score + (
+						CASE 
+							WHEN (SELECT votetype FROM upsert) IS NULL THEN 0
+							WHEN (SELECT votetype FROM upsert) = 1 THEN 1
+							ELSE -1
+						END
+					)
+			WHERE id = (SELECT linkid::integer FROM upsert)
+			RETURNING score;
+			`
+
+	err := d.dB.Get(&score, query, vote.LinkID, userid, vote.Vote)
+	if err == sql.ErrNoRows {
+		return 0, nil
+	}
+	return score, err
 }

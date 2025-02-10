@@ -7,6 +7,7 @@ type Link struct {
 	Title   string `json:"title"`
 	Address string `json:"address"`
 	User    *User  `json:"user"`
+	Score   int32  `json:"score"`
 }
 
 type Login struct {
@@ -34,7 +35,15 @@ type RefreshTokenInput struct {
 	Token string `json:"token"`
 }
 
+type Subscription struct {
+}
+
 type User struct {
 	ID   string `json:"id"`
 	Name string `json:"name"`
+}
+
+type VoteInput struct {
+	LinkID string `json:"linkId"`
+	Vote   int32  `json:"vote"`
 }
