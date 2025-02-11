@@ -2,6 +2,12 @@
 
 package model
 
+import (
+	"fmt"
+	"io"
+	"strconv"
+)
+
 type Link struct {
 	ID      string `json:"id"`
 	Title   string `json:"title"`
@@ -44,6 +50,47 @@ type User struct {
 }
 
 type VoteInput struct {
-	LinkID string `json:"linkId"`
-	Vote   int32  `json:"vote"`
+	LinkID string    `json:"linkId"`
+	Vote   *VoteType `json:"vote,omitempty"`
+}
+
+type VoteType string
+
+const (
+	VoteTypeUp   VoteType = "UP"
+	VoteTypeDown VoteType = "DOWN"
+)
+
+var AllVoteType = []VoteType{
+	VoteTypeUp,
+	VoteTypeDown,
+}
+
+func (e VoteType) IsValid() bool {
+	switch e {
+	case VoteTypeUp, VoteTypeDown:
+		return true
+	}
+	return false
+}
+
+func (e VoteType) String() string {
+	return string(e)
+}
+
+func (e *VoteType) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = VoteType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid VoteType", str)
+	}
+	return nil
+}
+
+func (e VoteType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
 }

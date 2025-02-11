@@ -124,6 +124,12 @@ func (d *DbService) AuthenticateUser(username string, password string) bool {
 }
 func (d *DbService) VoteLink(vote model.VoteInput, userid int) (int, error) {
 	var score int
+	var voteVal int
+	if *vote.Vote == "UP" {
+		voteVal = 1
+	} else {
+		voteVal = -1
+	}
 	query := `WITH upsert AS (
 				INSERT INTO votes (linkid, userid, votetype)
 					VALUES ($1, $2, $3)
@@ -146,7 +152,7 @@ func (d *DbService) VoteLink(vote model.VoteInput, userid int) (int, error) {
 			RETURNING score;
 			`
 
-	err := d.dB.Get(&score, query, vote.LinkID, userid, vote.Vote)
+	err := d.dB.Get(&score, query, vote.LinkID, userid, voteVal)
 	if err == sql.ErrNoRows {
 		return 0, nil
 	}
