@@ -44,9 +44,13 @@ type Mutation {
 
 input VoteInput {
   linkId: String!
-  vote: Int!
+  vote: VoteType
 }
 
 type Subscription{
   linkAdded: Link!
+}
+enum VoteType {
+  UP 
+  DOWN
 }

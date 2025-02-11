@@ -3580,7 +3580,7 @@ func (ec *executionContext) unmarshalInputVoteInput(ctx context.Context, obj any
 			it.LinkID = data
 		case "vote":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("vote"))
-			data, err := ec.unmarshalNInt2int32(ctx, v)
+			data, err := ec.unmarshalOVoteType2ᚖexampleᚋgraphqlᚋgraphᚋmodelᚐVoteType(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -4652,6 +4652,22 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 	}
 	res := graphql.MarshalString(*v)
 	return res
+}
+
+func (ec *executionContext) unmarshalOVoteType2ᚖexampleᚋgraphqlᚋgraphᚋmodelᚐVoteType(ctx context.Context, v any) (*model.VoteType, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var res = new(model.VoteType)
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOVoteType2ᚖexampleᚋgraphqlᚋgraphᚋmodelᚐVoteType(ctx context.Context, sel ast.SelectionSet, v *model.VoteType) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return v
 }
 
 func (ec *executionContext) marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐEnumValueᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.EnumValue) graphql.Marshaler {
